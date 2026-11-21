@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yuna
+      POSTGRES_PASSWORD: yuna1234
+      POSTGRES_DB: minidb
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://yuna:yuna1234@db:5432/minidb
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+volumes:
+  db-data:
